@@ -1,8 +1,26 @@
 import axios from 'axios'
 
+export async function callAIService(inputData: any, token: string) {
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/ai/generate-questions`,
+      { productData: inputData },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error calling AI service:', error.message);
+    return { success: false, error: 'AI service error' };
+  }
+}
+
+
 // Base URLs from environment variables
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
-const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000'
+const API_URL = import.meta.env.VITE_API_URL;
+const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL;
+
 
 // Regular backend API
 export const api = axios.create({
