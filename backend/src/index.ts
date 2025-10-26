@@ -14,8 +14,6 @@ import { productRoutes } from './routes/products'
 import { reportRoutes } from './routes/reports'
 import { aiRoutes } from './routes/ai'
 
-// In your env: 
-// AI_SERVICE_URL=https://veriscope-ai.vercel.app/api/ai
 
 import axios from 'axios';
 
@@ -23,7 +21,7 @@ const AI_SERVICE_URL = process.env.AI_SERVICE_URL;
 
 export async function generateQuestions(inputData: any) {
   try {
-    const response = await axios.post(`${AI_SERVICE_URL}/generate-questions`, { productData: inputData });
+    const response = await axios.post(`${AI_SERVICE_URL}/api/ai/generate-questions`, { productData: inputData });
     return response.data;
   } catch (error: any) {
     console.error('Error generating questions:', error.message);
@@ -33,7 +31,7 @@ export async function generateQuestions(inputData: any) {
 
 export async function calculateTransparencyScore(inputData: any, answers: any) {
   try {
-    const response = await axios.post(`${AI_SERVICE_URL}/transparency-score`, {
+    const response = await axios.post(`${AI_SERVICE_URL}/api/ai/transparency-score`, {
       productData: inputData,
       answers
     });
@@ -46,7 +44,7 @@ export async function calculateTransparencyScore(inputData: any, answers: any) {
 
 export async function analyzeProduct(inputData: any, answers: any) {
   try {
-    const response = await axios.post(`${AI_SERVICE_URL}/analyze-product`, {
+    const response = await axios.post(`${AI_SERVICE_URL}/api/ai/analyze-product`, {
       product: inputData,
       answers
     });
