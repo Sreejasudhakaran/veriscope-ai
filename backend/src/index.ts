@@ -14,6 +14,19 @@ import { productRoutes } from './routes/products'
 import { reportRoutes } from './routes/reports'
 import { aiRoutes } from './routes/ai'
 
+import axios from 'axios';
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL;
+
+export async function callAIService(inputData: any) {
+  try {
+    const response = await axios.post(`${AI_SERVICE_URL}/api/ai/generate-questions`, { input: inputData });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error calling AI service:', error.message);
+    return { success: false, error: 'AI service error' };
+  }
+}
+
 // Load environment variables (support backend/env.local if present)
 import fs from 'fs'
 import path from 'path'
@@ -85,7 +98,7 @@ app.use(errorHandler)
 // Database connection
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/product-transparency'
+    const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://sreejasudhakaran06:Pakindimple@cluster0.kdfx8.mongodb.net/?appName=Cluster0'
     await mongoose.connect(mongoURI)
     console.log('✅ MongoDB connected successfully')
   } catch (error) {
