@@ -70,7 +70,8 @@ if (fs.existsSync(envLocalPath)) {
 }
 
 const app = express()
-const PORT = process.env.PORT || 5000
+// Ensure PORT is a number (process.env values are strings)
+const PORT = Number(process.env.PORT) || 5000
 
 // Security middleware
 app.use(helmet())
@@ -110,8 +111,14 @@ app.get('/health', (req, res) => {
     status: 'OK',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   })
+})
+
+// Root endpoint (some hosting platforms probe `/` for readiness)
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Product Transparency API is running' })
 })
 
 // API routes
@@ -136,14 +143,29 @@ const connectDB = async () => {
   }
 }
 
-// Start server
-const startServer = async () => {
+// Start server immediately so hosting platforms can probe the HTTP port quickly.
+// Connect to MongoDB asynchronously so a slow DB connect doesn't block the process from becoming reachable.
+const startServer = () => {
   try {
-    await connectDB()
-    app.listen(PORT, () => {
+    // Bind to 0.0.0.0 explicitly so some container hosts can reach the server
+    app.listen(PORT, '0.0.0.0', async () => {
       console.log(`🚀 Server running on port ${PORT}`)
       console.log(`📊 Environment: ${process.env.NODE_ENV}`)
       console.log(`🔗 Health check: http://localhost:${PORT}/health`)
+
+      // Self-check: attempt to call the local /health endpoint to verify the server is reachable
+      try {
+        const localResp = await axios.get(`http://127.0.0.1:${PORT}/health`, { timeout: 2000 })
+        console.log('✅ Self-check /health response:', localResp.data)
+      } catch (err: any) {
+        console.error('❌ Self-check failed (cannot reach local /health):', err.message)
+      }
+    })
+
+    // Connect to DB without blocking the HTTP server startup
+    connectDB().catch(err => {
+      console.error('❌ MongoDB connection failed (async):', err)
+      // Do not exit the process here; allow platform to probe the HTTP endpoints.
     })
   } catch (error) {
     console.error('❌ Failed to start server:', error)

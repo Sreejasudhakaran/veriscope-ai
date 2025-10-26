@@ -1,25 +1,22 @@
 import axios from 'axios'
 
-export async function callAIService(inputData: any, token: string) {
+// Normalize base URLs and strip trailing slashes
+const RAW_API_URL = (import.meta.env.VITE_API_URL as string) || 'http://localhost:5000'
+const RAW_AI_SERVICE_URL = (import.meta.env.VITE_AI_SERVICE_URL as string) || ''
+const API_URL = RAW_API_URL.replace(/\/+$/, '')
+const AI_SERVICE_URL = RAW_AI_SERVICE_URL.replace(/\/+$/, '')
+
+// Helper: call the backend's AI generate-questions endpoint via the main API client
+export async function callAIService(inputData: any) {
   try {
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}/api/ai/generate-questions`,
-      { productData: inputData },
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-    return response.data;
+    // use the main backend API so the backend can proxy to the AI microservice (keeps auth consistent)
+    const response = await api.post(endpoints.ai.generateQuestions, { productData: inputData })
+    return response.data
   } catch (error: any) {
-    console.error('Error calling AI service:', error.message);
-    return { success: false, error: 'AI service error' };
+    console.error('Error calling AI service via backend:', error?.response?.data || error.message)
+    return { success: false, error: 'AI service error' }
   }
 }
-
-
-// Base URLs from environment variables
-const API_URL = import.meta.env.VITE_API_URL;
-const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL;
 
 
 // Regular backend API
@@ -32,7 +29,7 @@ export const api = axios.create({
 
 // AI service API
 export const aiApi = axios.create({
-  baseURL: AI_SERVICE_URL,
+  baseURL: AI_SERVICE_URL || undefined,
   headers: {
     'Content-Type': 'application/json',
   },
