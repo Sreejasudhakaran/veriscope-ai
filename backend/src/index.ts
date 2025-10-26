@@ -105,6 +105,17 @@ app.use(compression())
 // Logging middleware
 app.use(morgan('combined'))
 
+// Debugging middleware: log incoming requests (router probes often hit here)
+app.use((req: any, res: any, next: any) => {
+  try {
+    const ip = req.headers['x-forwarded-for'] || req.ip || req.connection?.remoteAddress
+    console.log('INCOMING PROBE', { method: req.method, url: req.originalUrl || req.url, ip, ua: req.headers['user-agent'] })
+  } catch (e) {
+    console.log('INCOMING PROBE: failed to read request metadata')
+  }
+  next()
+})
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -148,10 +159,17 @@ const connectDB = async () => {
 const startServer = () => {
   try {
     // Bind to 0.0.0.0 explicitly so some container hosts can reach the server
-    app.listen(PORT, '0.0.0.0', async () => {
+    const server = app.listen(PORT, '0.0.0.0', async () => {
       console.log(`🚀 Server running on port ${PORT}`)
       console.log(`📊 Environment: ${process.env.NODE_ENV}`)
       console.log(`🔗 Health check: http://localhost:${PORT}/health`)
+      try {
+        const addr = server.address()
+        console.log('🚪 Server.address():', addr)
+        console.log('🔎 Raw PORT env:', process.env.PORT)
+      } catch (e) {
+        console.log('Could not read server.address()')
+      }
 
       // Self-check: attempt to call the local /health endpoint to verify the server is reachable
       try {
