@@ -5,7 +5,6 @@ import {
   Plus, 
   FileText, 
   TrendingUp, 
-  Users, 
   BarChart3,
   Calendar,
   Download,
@@ -14,7 +13,6 @@ import {
   Search
 } from 'lucide-react'
 import { api, endpoints } from '../services/api'
-import { Star, Zap } from 'lucide-react'
 
 
 interface Report {

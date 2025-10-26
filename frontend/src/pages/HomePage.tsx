@@ -5,11 +5,9 @@ import {
   Brain, 
   FileText, 
   CheckCircle, 
-  ArrowRight, 
-  Star,
-  Users,
-  Zap
+  ArrowRight
 } from 'lucide-react'
+
 
 export const HomePage = () => {
   const features = [
