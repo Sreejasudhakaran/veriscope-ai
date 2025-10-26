@@ -14,18 +14,49 @@ import { productRoutes } from './routes/products'
 import { reportRoutes } from './routes/reports'
 import { aiRoutes } from './routes/ai'
 
+// In your env: 
+// AI_SERVICE_URL=https://veriscope-ai.vercel.app/api/ai
+
 import axios from 'axios';
+
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL;
 
-export async function callAIService(inputData: any) {
+export async function generateQuestions(inputData: any) {
   try {
-    const response = await axios.post(`${AI_SERVICE_URL}/api/ai/generate-questions`, { input: inputData });
+    const response = await axios.post(`${AI_SERVICE_URL}/generate-questions`, { productData: inputData });
     return response.data;
   } catch (error: any) {
-    console.error('Error calling AI service:', error.message);
+    console.error('Error generating questions:', error.message);
     return { success: false, error: 'AI service error' };
   }
 }
+
+export async function calculateTransparencyScore(inputData: any, answers: any) {
+  try {
+    const response = await axios.post(`${AI_SERVICE_URL}/transparency-score`, {
+      productData: inputData,
+      answers
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error calculating transparency score:', error.message);
+    return { success: false, error: 'AI service error' };
+  }
+}
+
+export async function analyzeProduct(inputData: any, answers: any) {
+  try {
+    const response = await axios.post(`${AI_SERVICE_URL}/analyze-product`, {
+      product: inputData,
+      answers
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error analyzing product:', error.message);
+    return { success: false, error: 'AI service error' };
+  }
+}
+
 
 // Load environment variables (support backend/env.local if present)
 import fs from 'fs'

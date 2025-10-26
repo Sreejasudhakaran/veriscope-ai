@@ -77,7 +77,6 @@ const ReportSchema = new Schema<IReport>({
 
 // Indexes
 ReportSchema.index({ productId: 1 })
-ReportSchema.index({ userId: 1 })
 ReportSchema.index({ status: 1 })
 ReportSchema.index({ transparencyScore: -1 })
 ReportSchema.index({ createdAt: -1 })

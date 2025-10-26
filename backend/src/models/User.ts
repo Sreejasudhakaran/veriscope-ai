@@ -60,7 +60,8 @@ const UserSchema = new Schema<IUser>({
 })
 
 // Indexes
-UserSchema.index({ email: 1 })
+// Note: `unique: true` on the `email` field creates an index automatically.
+// Avoid declaring the same index twice to prevent Mongoose duplicate-index warnings.
 UserSchema.index({ company: 1 })
 UserSchema.index({ role: 1 })
 
